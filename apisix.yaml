@@ -1,0 +1,14 @@
+routes:
+  - id: health-check
+    uri: /health
+    upstream:
+      type: roundrobin
+      nodes:
+        127.0.0.1:9080
+        weight: 1
+    plugins:
+      proxy-rewrite:
+        uri: /apisix/admin/server_info/apisix
+        headers:
+          X-Api-Key: ed32ac1d5e64c06d3041a6fd17bf2f0f
+

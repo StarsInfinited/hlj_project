@@ -1,0 +1,20 @@
+conf:
+  listen:
+    host: 0.0.0.0
+    port: 9000
+  etcd:
+    endpoints:
+      - http://etcd:2379
+    prefix: /apisix
+    timeout: 30
+  admin:
+    admin_key:
+      - name: admin
+        key: ed32ac1d5e64c06d3041a6fd17bf2f0f
+        role: admin
+security:
+  login:
+    expire_time: 3600
+    secret: somesecretkey
+  csrf:
+    expire_time: 3600

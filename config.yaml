@@ -1,0 +1,27 @@
+deployment:
+  role: traditional
+  role_traditional:
+    config_provider: etcd
+  etcd:
+    host:
+      - http://etcd:2379
+    prefix: /apisix
+    timeout: 30
+  admin:
+    admin_key:
+      - name: admin
+        key: ed32ac1d5e64c06d3041a6fd17bf2f0f
+        role: admin
+    allow_admin:
+      - 0.0.0.0/0
+  apisix:
+    node_listen: 9080
+    ssl_listen_port: 9443
+    enable_ipv6: false
+
+plugins:
+  - prometheus
+  - proxy-rewrite
+  - cors
+  - echo
+  - request-id

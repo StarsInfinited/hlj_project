@@ -1,0 +1,68 @@
+version: "3.8"
+
+networks:
+  apisix-network:
+    driver: bridge
+
+services:
+  etcd:
+    image: bitnami/etcd:3.5.5
+    container_name: apisix-etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+    ports:
+      - "2379:2379"
+    volumes:
+      - etcd-data:/bitnami/etcd
+    networks:
+      - apisix-network
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  apisix:
+    image: apache/apisix:3.7.0
+    container_name: apisix
+    depends_on:
+      etcd:
+        condition: service_healthy
+    ports:
+      - "9080:9080"
+      - "9443:9443"
+      - "9180:9180"
+    volumes:
+      - ./apisix-config/config.yaml:/usr/local/apisix/conf/config.yaml
+      - ./apisix-config/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
+    environment:
+      - APISIX_ADMIN_API_KEY=ed32ac1d5e64c06d3041a6fd17bf2f0f
+    networks:
+      - apisix-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9180/apisix/admin/server_info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  apisix-dashboard:
+    image: apache/apisix-dashboard:3.0.0
+    container_name: apisix-dashboard
+    depends_on:
+      apisix:
+        condition: service_healthy
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./apisix-config/dashboard-conf.yaml:/usr/local/apisix-dashboard/conf/conf.yaml
+    environment:
+      - ADMIN_API_KEY=ed32ac1d5e64c06d3041a6fd17bf2f0f
+    networks:
+      - apisix-network
+
+volumes:
+  etcd-data:
